@@ -1,15 +1,30 @@
-# params.yaml
 prepare:
+  dataset_path: data/pakistan_house_prices.csv
   random_seed: 42
 
 features:
   test_size: 0.2
   random_state: 42
+  target_column: price  # Adjust based on actual dataset column name
+  categorical_features:
+    - city
+    - property_type
+    - province_name
+  numeric_features:
+    - baths
+    - bedrooms
+    - Area_in_Marla
 
 train:
+  model_type: RandomForestRegressor  # Changed from Classifier to Regressor
   n_estimators: 100
-  max_depth: 5
+  max_depth: 10  # Increased for regression
+  min_samples_split: 2
+  min_samples_leaf: 1
   random_state: 42
 
 evaluate:
-  average: macro
+  metrics:
+    - rmse
+    - mae
+    - r2_score
