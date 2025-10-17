@@ -43,23 +43,6 @@ def index():
     return render_template("index.html", feature_meta=feature_meta)
 
 
-@app.route("/signup")
-def signup():
-    return "Signup page"
-
-
-
-@app.route("/auth")
-def user_login():
-    return "User authentication page"
-
-
-
-@app.route("/login")
-def login():
-    return "Login page"
-
-
 @app.route("/predict", methods=["POST"])
 def predict():
     # build input vector in same order as feature_list

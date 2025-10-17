@@ -5,7 +5,7 @@ prepare:
 features:
   test_size: 0.2
   random_state: 42
-  target_column: price  # Adjust based on actual dataset column name
+  target_column: price
   categorical_features:
     - city
     - property_type
@@ -16,9 +16,9 @@ features:
     - Area_in_Marla
 
 train:
-  model_type: RandomForestRegressor  # Changed from Classifier to Regressor
+  model_type: RandomForestRegressor
   n_estimators: 100
-  max_depth: 10  # Increased for regression
+  max_depth: 10
   min_samples_split: 2
   min_samples_leaf: 1
   random_state: 42
