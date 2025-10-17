@@ -1,46 +1,61 @@
 stages:
   prepare:
-    cmd: python src/prepare.py --out_dir data
+    cmd: python src/prepare.py --dataset_path data/pakistan_house_prices.csv --out_csv data/processed_data.csv
+    deps:
+      - data/pakistan_house_prices.csv
+      - src/prepare.py
     outs:
-      - data/iris.csv
+      - data/processed_data.csv
     params:
       - prepare.random_seed
 
   features:
-    cmd: python src/features.py --in_csv data/iris.csv --out_dir data --test_size ${features.test_size} --random_state ${features.random_state}
+    cmd: python src/features.py --in_csv data/processed_data.csv --out_dir data
     deps:
-      - data/iris_dataset.csv
+      - data/processed_data.csv
       - src/features.py
     outs:
       - data/X_train.npy
       - data/X_test.npy
       - data/y_train.npy
       - data/y_test.npy
+      - data/label_encoders.pkl
+      - data/feature_list.pkl
+      - data/feature_field_map.pkl
     params:
       - features.test_size
       - features.random_state
+      - features.target_column
+      - features.categorical_features
 
   train:
-    cmd: python src/train.py --data_dir data --model_out model.pkl
+    cmd: python src/train.py --data_dir data --models_dir models
     deps:
       - data/X_train.npy
       - data/y_train.npy
+      - data/label_encoders.pkl
+      - data/feature_list.pkl
+      - data/feature_field_map.pkl
       - src/train.py
     outs:
-      - model.pkl
+      - models/house_price_model.pkl
+      - models/label_encoders.pkl
+      - models/model_features.pkl
+      - models/feature_field_map.pkl
     params:
       - train.n_estimators
       - train.max_depth
+      - train.min_samples_split
+      - train.min_samples_leaf
       - train.random_state
 
   evaluate:
-    cmd: python src/evaluate.py --data_dir data --model model.pkl --out metrics/eval.json
+    cmd: python src/evaluate.py --data_dir data --models_dir models --out metrics/eval.json
     deps:
-      - model.pkl
+      - models/house_price_model.pkl
       - data/X_test.npy
       - data/y_test.npy
       - src/evaluate.py
-    outs:
-      - metrics/eval.json
-    params:
-      - evaluate.average
+    metrics:
+      - metrics/eval.json:
+          cache: false

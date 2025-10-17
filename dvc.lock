@@ -1,98 +1,147 @@
 schema: '2.0'
 stages:
   prepare:
-    cmd: python src/prepare.py --out_dir data
+    cmd: python src/prepare.py --dataset_path data/pakistan_house_prices.csv 
+      --out_csv data/processed_data.csv
+    deps:
+    - path: data/pakistan_house_prices.csv
+      hash: md5
+      md5: 862ce971c086da8903e8ecc7c8a52c92
+      size: 49522076
+    - path: src/prepare.py
+      hash: md5
+      md5: acbe0735f3b8338423fbe1e19b0af3b2
+      size: 1328
     params:
       params.yaml:
         prepare.random_seed: 42
     outs:
-    - path: data/iris.csv
+    - path: data/processed_data.csv
       hash: md5
-      md5: 21d441a28bce4417276097df955afc50
-      size: 2928
+      md5: b688589470dd5ab6f157f37e6680d86c
+      size: 7055378
   features:
-    cmd: python src/features.py --in_csv data/iris.csv --out_dir data 
-      --test_size 0.2 --random_state 42
+    cmd: python src/features.py --in_csv data/processed_data.csv --out_dir data
     deps:
-    - path: data/iris_dataset.csv
+    - path: data/processed_data.csv
       hash: md5
-      md5: e77c66bd7bb4def259e0fd9f6efe417f
-      size: 2765
+      md5: b688589470dd5ab6f157f37e6680d86c
+      size: 7055378
     - path: src/features.py
       hash: md5
-      md5: 27170b245304aba4b722b99e22fb614a
-      size: 1099
+      md5: add1a613b4be899906d23db0ec55afbe
+      size: 2106
     params:
       params.yaml:
+        features.categorical_features:
+        - city
+        - property_type
+        - province_name
         features.random_state: 42
+        features.target_column: price
         features.test_size: 0.2
     outs:
     - path: data/X_test.npy
       hash: md5
-      md5: 6106b6fdfa5e57277f32c885bc1eed51
-      size: 1088
+      md5: b1612b60cbb177aa06cb5a8f354cb95e
+      size: 1617104
     - path: data/X_train.npy
       hash: md5
-      md5: abdc135983612a7ff50c3a300b5b4d55
-      size: 3968
+      md5: b0f609d7e635cdbf63a82c76254d880f
+      size: 6467936
+    - path: data/feature_field_map.pkl
+      hash: md5
+      md5: 72cec45156d3a8e66c0673f1a353ea26
+      size: 102
+    - path: data/feature_list.pkl
+      hash: md5
+      md5: 223c620d2d2952a6bf355c46a948316e
+      size: 90
+    - path: data/label_encoders.pkl
+      hash: md5
+      md5: 991c241388cd02707d0f907ea9a1e030
+      size: 1107
     - path: data/y_test.npy
       hash: md5
-      md5: c8a14810d1d66e69e3149abda346c748
-      size: 368
+      md5: a91267a4f0114f5df3031e0e2cd18393
+      size: 269624
     - path: data/y_train.npy
       hash: md5
-      md5: 2c2741a338b44cc698b03ddaddd77a6a
-      size: 1088
+      md5: 28bf73f9012b641e6d7f4eb9d4e68aa9
+      size: 1078096
   train:
-    cmd: python src/train.py --data_dir data --model_out model.pkl
+    cmd: python src/train.py --data_dir data --models_dir models
     deps:
     - path: data/X_train.npy
       hash: md5
-      md5: abdc135983612a7ff50c3a300b5b4d55
-      size: 3968
+      md5: b0f609d7e635cdbf63a82c76254d880f
+      size: 6467936
+    - path: data/feature_field_map.pkl
+      hash: md5
+      md5: 72cec45156d3a8e66c0673f1a353ea26
+      size: 102
+    - path: data/feature_list.pkl
+      hash: md5
+      md5: 223c620d2d2952a6bf355c46a948316e
+      size: 90
+    - path: data/label_encoders.pkl
+      hash: md5
+      md5: 991c241388cd02707d0f907ea9a1e030
+      size: 1107
     - path: data/y_train.npy
       hash: md5
-      md5: 2c2741a338b44cc698b03ddaddd77a6a
-      size: 1088
+      md5: 28bf73f9012b641e6d7f4eb9d4e68aa9
+      size: 1078096
     - path: src/train.py
       hash: md5
-      md5: d6b0ebfff707063a2034b2ce7dd9f218
-      size: 875
+      md5: e106608dc9f2d5e4c65aea26490c56d1
+      size: 1805
     params:
       params.yaml:
-        train.max_depth: 5
+        train.max_depth: 10
+        train.min_samples_leaf: 1
+        train.min_samples_split: 2
         train.n_estimators: 100
         train.random_state: 42
     outs:
-    - path: model.pkl
+    - path: models/feature_field_map.pkl
       hash: md5
-      md5: b423048acee4c03e18db32cb2f9db0f4
-      size: 163137
+      md5: 72cec45156d3a8e66c0673f1a353ea26
+      size: 102
+    - path: models/house_price_model.pkl
+      hash: md5
+      md5: 6988bc9c316ff05a1effdd61b2b1633c
+      size: 9352897
+    - path: models/label_encoders.pkl
+      hash: md5
+      md5: 991c241388cd02707d0f907ea9a1e030
+      size: 1107
+    - path: models/model_features.pkl
+      hash: md5
+      md5: 223c620d2d2952a6bf355c46a948316e
+      size: 90
   evaluate:
-    cmd: python src/evaluate.py --data_dir data --model model.pkl --out 
+    cmd: python src/evaluate.py --data_dir data --models_dir models --out 
       metrics/eval.json
     deps:
     - path: data/X_test.npy
       hash: md5
-      md5: 6106b6fdfa5e57277f32c885bc1eed51
-      size: 1088
+      md5: b1612b60cbb177aa06cb5a8f354cb95e
+      size: 1617104
     - path: data/y_test.npy
       hash: md5
-      md5: c8a14810d1d66e69e3149abda346c748
-      size: 368
-    - path: model.pkl
+      md5: a91267a4f0114f5df3031e0e2cd18393
+      size: 269624
+    - path: models/house_price_model.pkl
       hash: md5
-      md5: b423048acee4c03e18db32cb2f9db0f4
-      size: 163137
+      md5: 6988bc9c316ff05a1effdd61b2b1633c
+      size: 9352897
     - path: src/evaluate.py
       hash: md5
-      md5: cc48b38c5a00fbfdb9d00b817f813c06
-      size: 932
-    params:
-      params.yaml:
-        evaluate.average: macro
+      md5: 0ac3a117c2f1df984efc6cc3371425c8
+      size: 1309
     outs:
     - path: metrics/eval.json
       hash: md5
-      md5: c57dd2e89a75372665eb758f7487453e
-      size: 73
+      md5: 90aff6a75cb94aca942b53c9334db067
+      size: 128

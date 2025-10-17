@@ -2,5 +2,7 @@ scikit-learn
 numpy
 pandas
 dvc
-joblib 
+joblib
 pyyaml
+flask
+gunicorn
